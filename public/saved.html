@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved Bus Routes - College Bus Route Optimizer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+  <div id="navbar-container"></div>
+
+  <main id="main-content" class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">
+          <span>📁</span> Saved Bus Routes Library
+        </h1>
+        <p class="page-subtitle">
+          Explore published bus routes, algorithm comparisons, and mileage analytics
+        </p>
+      </div>
+      <div>
+        <a href="/route.html" class="btn btn-primary">
+          ➕ Compute New Route
+        </a>
+      </div>
+    </div>
+
+    <!-- Comparative Analytics Card -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>📊</span> Graph Theory Algorithm Performance Insights
+        </h2>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; font-size: 0.85rem;">
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <div style="font-weight: 700; color: #60a5fa; margin-bottom: 0.35rem;">Dijkstra's Shortest Path</div>
+          <p style="color: var(--text-muted); line-height: 1.5;">
+            Guarantees mathematically optimal path between two specific stops. Complexity: <code>O((V + E) log V)</code>.
+          </p>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <div style="font-weight: 700; color: #fbbf24; margin-bottom: 0.35rem;">Prim's Minimum Spanning Tree</div>
+          <p style="color: var(--text-muted); line-height: 1.5;">
+            Connects all reachable stops using the minimum total road distance with zero cycles. Complexity: <code>O(E log V)</code>.
+          </p>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <div style="font-weight: 700; color: #34d399; margin-bottom: 0.35rem;">Nearest Neighbour Tour (TSP)</div>
+          <p style="color: var(--text-muted); line-height: 1.5;">
+            Greedy heuristic visiting every pickup stop and returning to college campus. Complexity: <code>O(V² log V)</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Routes Table -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>📋</span> Published Routes
+        </h2>
+        <input type="text" id="search-saved" class="form-control" placeholder="🔍 Filter saved routes..." style="max-width: 220px; padding: 0.4rem 0.75rem; font-size: 0.8rem;">
+      </div>
+
+      <div class="table-responsive">
+        <table class="table" id="saved-table">
+          <thead>
+            <tr>
+              <th style="width: 60px;">ID</th>
+              <th>Route Identifier</th>
+              <th>Algorithm</th>
+              <th>Total Distance</th>
+              <th>Created By</th>
+              <th>Saved On</th>
+              <th style="text-align: right; width: 140px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="saved-tbody">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-dim);">
+                Loading saved routes...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Route Details Modal -->
+  <div class="modal-overlay" id="route-details-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="details-modal-title" style="color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+          🚍 Route Details
+        </h3>
+        <button class="modal-close" onclick="closeDetailsModal()">&times;</button>
+      </div>
+
+      <div id="details-modal-body" style="font-size: 0.9rem; line-height: 1.6; color: var(--text-main);"></div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button class="btn btn-secondary" onclick="closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer" id="app-footer"></footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/saved.js"></script>
+</body>
+</html>

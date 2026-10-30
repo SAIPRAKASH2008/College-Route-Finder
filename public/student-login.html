@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student & Staff Sign In - College Bus Route Optimizer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <style>
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .auth-card {
+      max-width: 460px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body data-portal="USER">
+  <a href="#login-form" class="skip-to-content">Skip to login form</a>
+
+  <div class="auth-container">
+    <div class="card auth-card">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="display: inline-flex; width: 56px; height: 56px; background: linear-gradient(135deg, #4A3E4E, #68576F); border: 1px solid rgba(230, 224, 240, 0.35); border-radius: 14px; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 16px rgba(104, 87, 111, 0.45); margin-bottom: 0.75rem;" aria-hidden="true">
+          🎓
+        </div>
+        <div class="portal-badge portal-badge-student">
+          Student Portal • No 2FA Required
+        </div>
+        <h2 style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; color: #E5E4E2;">
+          Student Transit Sign In
+        </h2>
+        <p style="font-size: 0.85rem; color: #E6E0F0; margin-top: 0.2rem;">
+          Access bus routes, nearest stops & live travel times (No 2FA needed)
+        </p>
+      </div>
+
+      <!-- Quick Switcher Banner -->
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(230, 224, 240, 0.06); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.6rem 0.85rem; margin-bottom: 1.25rem; font-size: 0.8rem;">
+        <span style="color: var(--text-muted);">College Staff or Administrator?</span>
+        <a href="/admin-login.html" class="portal-switch-link">
+          👔 Staff & Admin Login (2FA) →
+        </a>
+      </div>
+
+      <!-- Error / Alert Banner -->
+      <div id="login-alert" class="alert alert-danger" style="display: none;" role="alert" aria-live="assertive"></div>
+
+      <form id="login-form">
+        <input type="hidden" id="portal-role" value="USER">
+
+        <div class="form-group">
+          <label class="form-label" for="login-email">Student College Email</label>
+          <input type="email" id="login-email" class="form-control" placeholder="student@college.edu" required autocomplete="email" aria-required="true">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••••••" required autocomplete="current-password" aria-required="true">
+        </div>
+
+        <button type="submit" id="btn-login" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem; background: linear-gradient(135deg, #5A4760, #796082); border-color: rgba(230, 224, 240, 0.3);" aria-label="Sign In as Student">
+          <span>🎓 Sign In as Student (No 2FA)</span>
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+        Don't have an account? <a href="/register.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Register Student Account</a>
+      </div>
+
+      <div style="margin-top: 0.85rem; text-align: center; font-size: 0.75rem; color: var(--text-dim); display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="/privacy-policy.html" style="color: var(--text-dim); text-decoration: none;">Privacy</a>
+        <span>•</span>
+        <a href="/terms.html" style="color: var(--text-dim); text-decoration: none;">Terms</a>
+        <span>•</span>
+        <a href="/cookie-policy.html" style="color: var(--text-dim); text-decoration: none;">Cookies</a>
+        <span>•</span>
+        <a href="/refund-policy.html" style="color: var(--text-dim); text-decoration: none;">Refunds</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

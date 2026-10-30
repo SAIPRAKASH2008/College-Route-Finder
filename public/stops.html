@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Pickup Points - College Bus Route Optimizer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+  <div id="navbar-container"></div>
+
+  <main id="main-content" class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">
+          <span>📍</span> Pickup Points (Graph Vertices)
+        </h1>
+        <p class="page-subtitle">
+          Configure bus stops, campus terminals, and GPS coordinates for route optimization
+        </p>
+      </div>
+      <div>
+        <a href="/route.html" class="btn btn-primary">
+          🧭 View on Interactive Graph
+        </a>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 360px 1fr; gap: 1.5rem; align-items: start;">
+      <!-- Add Stop Card -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span>➕</span> Add Pickup Point
+          </h2>
+        </div>
+
+        <div id="add-alert" class="alert" style="display: none;"></div>
+
+        <form id="add-stop-form">
+          <div class="form-group">
+            <label class="form-label" for="stop-name">Stop Name / Label *</label>
+            <input type="text" id="stop-name" class="form-control" placeholder="e.g. Stop G - East Terminal" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group">
+              <label class="form-label" for="stop-lat">Latitude (Optional)</label>
+              <input type="number" step="any" id="stop-lat" class="form-control" placeholder="12.9716">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="stop-lng">Longitude (Optional)</label>
+              <input type="number" step="any" id="stop-lng" class="form-control" placeholder="77.5946">
+            </div>
+          </div>
+
+          <div style="margin-top: -0.25rem; margin-bottom: 0.75rem;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openMapPicker('add')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(230, 224, 240, 0.12); border-color: rgba(230, 224, 240, 0.35); color: #E6E0F0;">
+              <span>🗺️ Pick on Map / Google Maps Search</span>
+            </button>
+          </div>
+
+          <div class="form-group" style="margin-top: 0.5rem;">
+            <label class="checkbox-label">
+              <input type="checkbox" id="stop-is-college">
+              <span style="font-weight: 600; color: #fbbf24;">Mark as Main College Terminal Node</span>
+            </label>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; margin-left: 1.5rem;">
+              The bus route optimization algorithms will treat this vertex as the primary campus hub.
+            </div>
+          </div>
+
+          <button type="submit" id="btn-add-stop" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">
+            <span>Add Pickup Point</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Stops Table Card -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span>📋</span> Existing Network Vertices
+          </h2>
+          <input type="text" id="search-stops" class="form-control" placeholder="🔍 Filter stops..." style="max-width: 200px; padding: 0.4rem 0.75rem; font-size: 0.8rem;">
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" id="stops-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">ID</th>
+                <th>Stop Name</th>
+                <th>Coordinates</th>
+                <th>Category</th>
+                <th style="text-align: right; width: 140px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stops-tbody">
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-dim);">
+                  Loading pickup points...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Stop Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+          ✏️ Edit Pickup Point
+        </h3>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+
+      <div id="edit-alert" class="alert" style="display: none;"></div>
+
+      <form id="edit-stop-form">
+        <input type="hidden" id="edit-stop-id">
+
+        <div class="form-group">
+          <label class="form-label" for="edit-stop-name">Stop Name *</label>
+          <input type="text" id="edit-stop-name" class="form-control" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label" for="edit-stop-lat">Latitude</label>
+            <input type="number" step="any" id="edit-stop-lat" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-stop-lng">Longitude</label>
+            <input type="number" step="any" id="edit-stop-lng" class="form-control">
+          </div>
+        </div>
+
+        <div style="margin-top: -0.25rem; margin-bottom: 0.75rem;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openMapPicker('edit')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(230, 224, 240, 0.12); border-color: rgba(230, 224, 240, 0.35); color: #E6E0F0;">
+            <span>🗺️ Pick on Map / Google Maps Search</span>
+          </button>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.5rem;">
+          <label class="checkbox-label">
+            <input type="checkbox" id="edit-stop-is-college">
+            <span style="font-weight: 600; color: #fbbf24;">Designate as Main College Campus</span>
+          </label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" id="btn-save-edit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Interactive Map Location Picker Modal -->
+  <div class="modal-overlay" id="map-picker-modal" style="z-index: 1050;">
+    <div class="modal-content" style="max-width: 720px; width: 95%;">
+      <div class="modal-header">
+        <h3 style="color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+          🗺️ Pick Location on Map / Google Maps
+        </h3>
+        <button class="modal-close" onclick="closeMapPicker()">&times;</button>
+      </div>
+
+      <div style="padding: 1rem 0;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <input type="text" id="map-search-input" class="form-control" placeholder="Search landmark, stop, or street (e.g. Indiranagar, Bangalore)...">
+          <button type="button" class="btn btn-primary" onclick="searchMapLocation()">🔍 Search</button>
+        </div>
+        
+        <div id="picker-map" style="height: 380px; width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color); z-index: 1;"></div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; font-size: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>GPS: <strong id="picked-coords-display" style="color: var(--accent-cyan); font-family: monospace;">12.9716, 77.5946</strong></div>
+          <div id="picked-address-display" style="max-width: 340px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; color: var(--text-dim);">Click anywhere on map to drop pin</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeMapPicker()">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-use-location" onclick="applyPickedLocation()">Use This Location</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer" id="app-footer"></footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/stops.js"></script>
+</body>
+</html>

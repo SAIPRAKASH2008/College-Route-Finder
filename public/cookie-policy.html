@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookie Policy - College Bus Route Optimizer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+  <div id="navbar-container"></div>
+
+  <main id="main-content" class="legal-page-container">
+    <div class="legal-card">
+      <div class="legal-header">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+          <span style="font-size: 2rem;">🍪</span>
+          <h1 style="font-family: var(--font-heading); font-size: 1.85rem; font-weight: 700; color: var(--platinum); margin: 0;">
+            Cookie & Local Storage Policy
+          </h1>
+        </div>
+        <div class="legal-meta">
+          <span><strong>Effective Date:</strong> October 2026</span>
+          <span><strong>Compliance:</strong> India's DPDP Act, 2023 & Global Privacy Standards</span>
+        </div>
+      </div>
+
+      <div class="legal-highlight-box">
+        <strong>Cookie Transparency:</strong> We only use cookies and browser storage strictly required for authentication and security, plus optional anonymous visit counters to balance transit route server loads. We do not use any commercial advertising trackers.
+      </div>
+
+      <section class="legal-section">
+        <h2>1. What Are Cookies and Local Storage?</h2>
+        <p>
+          Cookies and HTML5 Local Storage are small text files or key-value entries stored directly in your web browser. They allow our web application to recognize your session as you navigate across bus stops, view route graphs, and check live schedules without asking you to sign in on every single page.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>2. Categories of Storage We Use</h2>
+        
+        <div style="overflow-x: auto; margin: 1.5rem 0;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <thead>
+              <tr style="background: rgba(111, 78, 55, 0.25); border-bottom: 2px solid var(--border-color); text-align: left;">
+                <th style="padding: 10px; color: var(--platinum);">Storage Key</th>
+                <th style="padding: 10px; color: var(--platinum);">Category</th>
+                <th style="padding: 10px; color: var(--platinum);">Purpose</th>
+                <th style="padding: 10px; color: var(--platinum);">Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 10px; font-family: monospace; color: var(--accent);">token</td>
+                <td style="padding: 10px;"><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">Strictly Necessary</span></td>
+                <td style="padding: 10px;">Stores your encrypted JSON Web Token (JWT) session to verify authorized transit access.</td>
+                <td style="padding: 10px;">24 Hours / Logout</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 10px; font-family: monospace; color: var(--accent);">user</td>
+                <td style="padding: 10px;"><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">Strictly Necessary</span></td>
+                <td style="padding: 10px;">Stores display name and role (Student / Staff / Admin) to render appropriate navigation links.</td>
+                <td style="padding: 10px;">Session / Logout</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 10px; font-family: monospace; color: var(--accent);">cookie_consent</td>
+                <td style="padding: 10px;"><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">Strictly Necessary</span></td>
+                <td style="padding: 10px;">Remembers your affirmative privacy preference ('all' vs 'essential').</td>
+                <td style="padding: 10px;">1 Year</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 10px; font-family: monospace; color: var(--accent);">visitor_logs</td>
+                <td style="padding: 10px;"><span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">Optional Analytics</span></td>
+                <td style="padding: 10px;">Anonymized page load counters (with IP masked) to optimize route server bandwidth.</td>
+                <td style="padding: 10px;">30 Days</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="legal-section">
+        <h2>3. Do You Need Cookie Consent?</h2>
+        <p>
+          <strong>Yes.</strong> Under India's Digital Personal Data Protection (DPDP) Act, 2023, personal data or usage indicators may only be processed on the basis of informed consent or specific legitimate uses.
+        </p>
+        <p>
+          While <em>strictly necessary authentication tokens</em> do not require consent because the application cannot function without them, we provide a proactive <strong>Cookie Consent Banner</strong> for all first-time visitors, enabling you to choose whether optional analytics and telemetry logging are enabled or disabled.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>4. Manage Your Cookie Preferences</h2>
+        <p>You can adjust or reset your cookie preferences at any time using the controls below:</p>
+        
+        <div class="grievance-officer-card" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <strong>Current Status:</strong> 
+              <span id="current-cookie-status" style="color: var(--accent); font-weight: 600;">Detecting preference...</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm" data-cookie-preference="essential">
+                🛡️ Only Essential
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" data-cookie-preference="all">
+                ✅ Allow All
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="legal-section">
+        <h2>5. Inquiries & Data Privacy Officer</h2>
+        <p>If you have any questions about our use of cookies or browser storage, contact:</p>
+        <p>
+          <strong>Email:</strong> <a href="mailto:saiprakash9813@gmail.com" style="color: var(--accent); font-weight: 600;">saiprakash9813@gmail.com</a>
+        </p>
+      </section>
+
+      <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <a href="/index.html" class="btn btn-secondary">← Back to Portal Home</a>
+        <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
+          <a href="/privacy-policy.html" style="color: var(--accent);">Privacy Policy</a>
+          <a href="/terms.html" style="color: var(--accent);">Terms & Conditions</a>
+          <a href="/refund-policy.html" style="color: var(--accent);">Refund Policy</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer" id="app-footer"></footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    function updatePreferenceDisplay() {
+      const statusElem = document.getElementById('current-cookie-status');
+      const pref = localStorage.getItem('cookie_consent');
+      if (pref === 'all') {
+        statusElem.innerHTML = '<span style="color: #34d399;">All Cookies Accepted (Analytics Active)</span>';
+      } else if (pref === 'essential') {
+        statusElem.innerHTML = '<span style="color: #60a5fa;">Essential Only (Analytics Muted)</span>';
+      } else {
+        statusElem.innerHTML = '<span style="color: #fbbf24;">No preference saved yet</span>';
+      }
+    }
+
+    function setManualCookiePreference(choice) {
+      localStorage.setItem('cookie_consent', choice);
+      document.cookie = `cookie_consent=${choice}; path=/; max-age=31536000; SameSite=Lax`;
+      updatePreferenceDisplay();
+      showToast(`Cookie preference updated to: ${choice === 'all' ? 'All Cookies' : 'Essential Only'}`, 'success');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updatePreferenceDisplay();
+      document.querySelectorAll('[data-cookie-preference]').forEach((button) => {
+        button.addEventListener('click', () => setManualCookiePreference(button.dataset.cookiePreference));
+      });
+    });
+  </script>
+</body>
+</html>

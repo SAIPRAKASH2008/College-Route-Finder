@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Road Distances - College Bus Route Optimizer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+  <div id="navbar-container"></div>
+
+  <main id="main-content" class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">
+          <span>🛣️</span> Road Connections (Graph Edges)
+        </h1>
+        <p class="page-subtitle">
+          Define weighted undirected road connections and physical distances in kilometers between pickup points
+        </p>
+      </div>
+      <div>
+        <a href="/route.html" class="btn btn-primary">
+          🧭 View on Interactive Graph
+        </a>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 380px 1fr; gap: 1.5rem; align-items: start;">
+      <!-- Add Edge Form -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span>➕</span> Connect Two Pickup Points
+          </h2>
+        </div>
+
+        <div id="add-edge-alert" class="alert" style="display: none;"></div>
+
+        <form id="add-edge-form">
+          <div class="form-group">
+            <label class="form-label" for="edge-source">Pickup Point A *</label>
+            <select id="edge-source" class="form-select" required>
+              <option value="">Select pickup point...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edge-dest">Pickup Point B *</label>
+            <select id="edge-dest" class="form-select" required>
+              <option value="">Select pickup point...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edge-distance">Distance in Kilometers (km) *</label>
+            <input type="number" step="0.1" min="0.1" id="edge-distance" class="form-control" placeholder="e.g. 4.5" required>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+              The graph is undirected; the distance is symmetric between A and B.
+            </div>
+          </div>
+
+          <button type="submit" id="btn-add-edge" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">
+            <span>Add Road Connection</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Edges Table -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span>📋</span> Active Road Distances
+          </h2>
+          <input type="text" id="search-edges" class="form-control" placeholder="🔍 Filter roads..." style="max-width: 200px; padding: 0.4rem 0.75rem; font-size: 0.8rem;">
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" id="edges-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">ID</th>
+                <th>Stop A</th>
+                <th style="text-align: center;">Connection</th>
+                <th>Stop B</th>
+                <th>Distance (km)</th>
+                <th style="text-align: right; width: 140px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="edges-tbody">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-dim);">
+                  Loading road connections...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Edge Modal -->
+  <div class="modal-overlay" id="edit-edge-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+          ✏️ Edit Road Distance
+        </h3>
+        <button class="modal-close" onclick="closeEditEdgeModal()">&times;</button>
+      </div>
+
+      <div id="edit-edge-alert" class="alert" style="display: none;"></div>
+
+      <form id="edit-edge-form">
+        <input type="hidden" id="edit-edge-id">
+
+        <div class="form-group">
+          <label class="form-label" for="edit-edge-source">Pickup Point A</label>
+          <select id="edit-edge-source" class="form-select" required></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-edge-dest">Pickup Point B</label>
+          <select id="edit-edge-dest" class="form-select" required></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-edge-distance">Distance in km</label>
+          <input type="number" step="0.1" min="0.1" id="edit-edge-distance" class="form-control" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditEdgeModal()">Cancel</button>
+          <button type="submit" id="btn-save-edge-edit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="app-footer" id="app-footer"></footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/edges.js"></script>
+</body>
+</html>

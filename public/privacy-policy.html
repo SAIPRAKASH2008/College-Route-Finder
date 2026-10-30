@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - College Bus Route Optimizer & Security System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+  <div id="navbar-container"></div>
+
+  <main id="main-content" class="legal-page-container">
+    <div class="legal-card">
+      <div class="legal-header">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+          <span style="font-size: 2rem;">🔒</span>
+          <h1 style="font-family: var(--font-heading); font-size: 1.85rem; font-weight: 700; color: var(--platinum); margin: 0;">
+            Privacy Policy & Data Protection Notice
+          </h1>
+        </div>
+        <div class="legal-meta">
+          <span><strong>Effective Date:</strong> October 2026</span>
+          <span><strong>Compliance:</strong> India's Digital Personal Data Protection (DPDP) Act, 2023 & IT Act, 2000</span>
+          <span><strong>Data Fiduciary:</strong> Campus Transit Operations</span>
+        </div>
+      </div>
+
+      <div class="legal-highlight-box">
+        <strong>Executive Summary:</strong> We respect your privacy and only collect personal data strictly required to deliver college bus routing, schedule calculations, and physical terminal security deterrence. We do not sell your data or utilize commercial advertising trackers.
+      </div>
+
+      <section class="legal-section">
+        <h2>1. Identity of the Data Fiduciary</h2>
+        <p>
+          Under the provisions of the Digital Personal Data Protection (DPDP) Act, 2023 of India, <strong>Campus Transit Operations & College Bus Route Optimizer System</strong> acts as the "Data Fiduciary" responsible for determining the purpose and means of processing your personal data.
+        </p>
+        <p>
+          <strong>Official Address:</strong> Campus Transportation Dept., University Road, India<br>
+          <strong>Official Communications:</strong> <a href="mailto:saiprakash9813@gmail.com" style="color: var(--accent);">saiprakash9813@gmail.com</a>
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>2. Data We Collect & Specific Processing Purposes</h2>
+        <p>In accordance with the principle of data minimization (Section 4, DPDP Act), we only collect data that is strictly necessary for transit services and security:</p>
+        <ul>
+          <li><strong>Student & User Accounts:</strong> Full name, institutional or personal email address, salted password hash (bcrypt), and account privilege level (Student/User). Purpose: Authenticating transit access and saving personal bus routes.</li>
+          <li><strong>Staff & Administrator Accounts:</strong> Name, college email, password hash, and Google Authenticator Two-Factor (2FA) TOTP secret key encrypted with AES-256-CBC. Purpose: Enforcing administrative clearance and securing route graph data.</li>
+          <li><strong>Biometric Terminal Camera Snapshots:</strong> A webcam photo captured strictly upon unauthorized or repeated failed login attempts at administrative clearance terminals. Purpose: Legitimate security use under Section 4 and Section 7 of the DPDP Act for deterrence of unauthorized terminal tampering, dispatched immediately to the security administrator at <code>saiprakash9813@gmail.com</code>.</li>
+          <li><strong>Technical Logs:</strong> Anonymized IP addresses (with the final octet masked, e.g., <code>192.168.1.0</code>), browser user-agent header, and referrer URL. Purpose: System performance, debugging, and traffic analytics.</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>3. Lawful Basis for Processing</h2>
+        <p>We process personal data under the following lawful grounds established by the DPDP Act, 2023:</p>
+        <ul>
+          <li><strong>Consent (Section 6):</strong> Affirmative, free, specific, informed, and unambiguous consent provided when registering an account, subscribing to transit updates, or enabling optional analytics cookies.</li>
+          <li><strong>Legitimate Uses (Section 7):</strong> Protecting terminal infrastructure, investigating unauthorized intrusion breaches, enforcing rate limits, and ensuring institutional campus safety.</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>4. Your Rights Under the DPDP Act, 2023</h2>
+        <p>As a Data Principal in India, you enjoy the following statutory rights:</p>
+        <ul>
+          <li><strong>Right to Access Information (Section 11):</strong> You may request a summary of your personal data processed by us and the identities of any processors.</li>
+          <li><strong>Right to Correction & Erasure (Section 12):</strong> You may request the correction of inaccurate data or the permanent deletion of your account and associated route logs.</li>
+          <li><strong>Right of Grievance Redressal (Section 13):</strong> You have the right to register a grievance with our designated Grievance Officer and receive timely resolution.</li>
+          <li><strong>Right to Nominate (Section 14):</strong> You have the right to designate an authorized nominee in accordance with DPDP rules in case of death or incapacity.</li>
+          <li><strong>Right to Withdraw Consent:</strong> You may withdraw consent for optional analytics or cancel your user account at any time without penalty.</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>5. Data Security & Storage Standards</h2>
+        <p>
+          We employ robust technical and organizational security controls to protect your data:
+        </p>
+        <ul>
+          <li><strong>Encryption:</strong> TOTP secrets are encrypted at rest using AES-256-CBC with a secure 32-byte key. Passwords are irreversibly hashed using bcrypt.</li>
+          <li><strong>Brute Force Lockout:</strong> Automated rate limiting locks out IP addresses and accounts after failed attempts to prevent unauthorized password guessing.</li>
+          <li><strong>Access Control:</strong> Granular role-based authorization separates Student transit tools from Administrator graph editing endpoints.</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>6. Third-Party Services & Map Providers</h2>
+        <p>
+          Our application integrates with <strong>OpenStreetMap</strong> and Leaflet for geospatial coordinate visualization. Map tiles are fetched directly from OpenStreetMap servers subject to the <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color: var(--accent);">OpenStreetMap Copyright & License</a>. No student personal information or student travel history is shared with map providers.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>7. Grievance Officer & Contact Details</h2>
+        <p>
+          In accordance with the DPDP Act, 2023 and the Information Technology Act, 2000, our designated Grievance Officer details are published below:
+        </p>
+        <div class="grievance-officer-card">
+          <p><strong>Grievance Officer:</strong> Data Protection & Redressal Desk</p>
+          <p><strong>Email Address:</strong> <a href="mailto:saiprakash9813@gmail.com" style="color: var(--accent); font-weight: 600;">saiprakash9813@gmail.com</a></p>
+          <p><strong>Response Turnaround:</strong> Inquiries and grievance reports are resolved promptly and within statutory DPDP timeframes.</p>
+          <p><strong>Physical Inquiries:</strong> Campus Transit Operations, University Road, India</p>
+        </div>
+      </section>
+
+      <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <a href="/index.html" class="btn btn-secondary">← Back to Portal Home</a>
+        <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
+          <a href="/terms.html" style="color: var(--accent);">Terms & Conditions</a>
+          <a href="/cookie-policy.html" style="color: var(--accent);">Cookie Policy</a>
+          <a href="/refund-policy.html" style="color: var(--accent);">Refund Policy</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer" id="app-footer"></footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+</body>
+</html>

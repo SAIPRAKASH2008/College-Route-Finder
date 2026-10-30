@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - College Bus Route Optimizer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <style>
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .auth-card {
+      max-width: 480px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <div class="card auth-card">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="display: inline-flex; width: 56px; height: 56px; background: linear-gradient(135deg, #6F4E37, #8D6346); border: 1px solid rgba(229, 228, 226, 0.35); border-radius: 14px; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 16px rgba(111, 78, 55, 0.45); margin-bottom: 0.75rem;">
+          👤
+        </div>
+        <h2 style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; color: #E5E4E2;">
+          Create Your Account
+        </h2>
+        <p style="font-size: 0.85rem; color: #E6E0F0; margin-top: 0.2rem;">
+          Join the College Bus Route Optimizer Network
+        </p>
+      </div>
+
+      <div id="register-alert" class="alert alert-danger" style="display: none;"></div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" class="form-control" placeholder="e.g. Priya Sharma" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-email">College / Personal Email</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="user@college.edu" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <input type="password" id="reg-password" class="form-control" placeholder="Minimum 6 characters" minlength="6" required autocomplete="new-password">
+        </div>
+
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+          New registrations are student accounts. Staff/admin accounts must be provisioned by an administrator.
+        </p>
+
+        <!-- Form Consent Checkbox (DPDP Act 2023 & Terms) -->
+        <div class="form-consent-box">
+          <input type="checkbox" id="reg-consent" required aria-required="true">
+          <label for="reg-consent">
+            I agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms & Conditions</a> and consent to the processing of my account details under the <a href="/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a> (DPDP Act, 2023).
+          </label>
+        </div>
+
+        <button type="submit" id="btn-register" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;" aria-label="Submit Account Registration">
+          <span>Create Account</span>
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+        Already have an account? <a href="/index.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Sign in here</a>
+      </div>
+      <div style="text-align: center; margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-dim);">
+        <a href="/privacy-policy.html" style="color: var(--text-dim);">Privacy</a> • 
+        <a href="/terms.html" style="color: var(--text-dim);">Terms</a> • 
+        <a href="/refund-policy.html" style="color: var(--text-dim);">Refunds</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    const registerForm = document.getElementById('register-form');
+    const registerAlert = document.getElementById('register-alert');
+    const btnRegister = document.getElementById('btn-register');
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const consent = document.getElementById('reg-consent');
+
+      if (consent && !consent.checked) {
+        registerAlert.className = 'alert alert-danger';
+        registerAlert.style.display = 'flex';
+        registerAlert.innerHTML = '<span>⚠️</span><div>Please accept the Terms & Conditions and Privacy Policy under the DPDP Act to register.</div>';
+        return;
+      }
+
+      registerAlert.style.display = 'none';
+      btnRegister.disabled = true;
+      btnRegister.innerHTML = '<span>Creating Account...</span>';
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          registerAlert.className = 'alert alert-danger';
+          registerAlert.style.display = 'flex';
+          registerAlert.innerHTML = `<span>⚠️</span><div>${data.error || 'Registration failed.'}</div>`;
+          return;
+        }
+
+        registerAlert.className = 'alert alert-success';
+        registerAlert.style.display = 'flex';
+        registerAlert.innerHTML = `<span>✅</span><div>Account created successfully! Redirecting to login...</div>`;
+
+        setTimeout(() => {
+          window.location.href = '/index.html';
+        }, 1200);
+
+      } catch (err) {
+        registerAlert.className = 'alert alert-danger';
+        registerAlert.style.display = 'flex';
+        registerAlert.innerHTML = `<span>⚠️</span><div>Network error: ${err.message}</div>`;
+      } finally {
+        btnRegister.disabled = false;
+        btnRegister.innerHTML = '<span>Register Account</span>';
+      }
+    });
+  </script>
+</body>
+</html>

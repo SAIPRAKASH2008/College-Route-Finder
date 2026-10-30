@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security & Route Command Center - College Bus Optimizer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+  <div id="navbar-container"></div>
+
+  <main id="main-content" class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">
+          <span>🛡️</span> Security & Network Command Center
+        </h1>
+        <p class="page-subtitle">
+          Real-time intrusion detection, live visitor feed, and graph network analytics
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="/route.html" class="btn btn-primary">
+          🧭 Launch Route Finder
+        </a>
+        <a href="/setup-2fa.html" class="btn btn-secondary" id="admin-2fa-btn" style="display: none;">
+          🛡️ 2FA Settings
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon visitors">🌐</div>
+        <div class="stat-content">
+          <div class="stat-value" id="stat-visitors">0</div>
+          <div class="stat-label">Total Visits Tracked</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon intruders">🚨</div>
+        <div class="stat-content">
+          <div class="stat-value" id="stat-intruders" style="color: #f87171;">0</div>
+          <div class="stat-label">Intruder Alerts</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stops">📍</div>
+        <div class="stat-content">
+          <div class="stat-value" id="stat-stops">0</div>
+          <div class="stat-label">Pickup Points</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon routes">🛣️</div>
+        <div class="stat-content">
+          <div class="stat-value" id="stat-edges">0</div>
+          <div class="stat-label">Road Connections</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Left Column: Real-time Live Visitor Stream -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="status-dot"></span> Live Visitor Activity Feed
+          </h2>
+          <span style="font-size: 0.75rem; color: var(--accent); font-weight: 600;">SOCKET.IO PUSH ACTIVE</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Pushes real-time alerts whenever a visitor lands on any page of the portal.
+        </p>
+        
+        <div class="live-feed-list" id="visitor-feed-list">
+          <div style="text-align: center; padding: 2rem; color: var(--text-dim); font-size: 0.875rem;">
+            ⏳ Waiting for real-time visitor traffic...
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Security Status & Quick Navigation -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Security Shield Status Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span>🛡️</span> Terminal Protection Status
+            </h2>
+            <span id="security-badge-status" class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">PROTECTED</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">Webcam Intruder Capture:</span>
+              <span style="color: #34d399; font-weight: 600;">● Active on Login</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">Email Alert Dispatch:</span>
+              <span style="color: #38bdf8; font-weight: 600;">Nodemailer (SMTP)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              <span style="color: var(--text-muted);">Rate Limiter / Lockout:</span>
+              <span style="color: #f59e0b; font-weight: 600;">5 Attempts / 15 Mins</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted);">Graph Theory Engine:</span>
+              <span style="color: #a78bfa; font-weight: 600;">Dijkstra, Prim MST, NN</span>
+            </div>
+          </div>
+
+          <!-- Account Lockout Box (Visible if accounts currently locked) -->
+          <div id="locked-accounts-container" style="display: none; margin-top: 1rem; padding: 0.85rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm);">
+            <div style="font-weight: 700; color: #f87171; font-size: 0.85rem; margin-bottom: 0.5rem;">
+              🔒 Locked Accounts / IPs
+            </div>
+            <div id="locked-list"></div>
+          </div>
+        </div>
+
+        <!-- Quick Launch Shortcuts -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span>⚡</span> Graph & Optimizer Modules
+            </h2>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <a href="/stops.html" class="btn btn-secondary" style="text-align: left; justify-content: flex-start;">
+              📍 Manage Stops
+            </a>
+            <a href="/edges.html" class="btn btn-secondary" style="text-align: left; justify-content: flex-start;">
+              🛣️ Road Distances
+            </a>
+            <a href="/route.html" class="btn btn-secondary" style="text-align: left; justify-content: flex-start;">
+              🧭 Route Finder
+            </a>
+            <a href="/saved.html" class="btn btn-secondary" style="text-align: left; justify-content: flex-start;">
+              📁 Saved Routes
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intruder Alert Gallery Section -->
+    <div class="card" style="margin-top: 2rem;">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>🚨</span> Intercepted Intruder Capture Gallery
+        </h2>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">
+          Photos captured during failed login attempts; admins can delete a photo and its record
+        </span>
+      </div>
+
+      <div id="intruder-gallery" class="intruder-gallery">
+        <div style="text-align: center; padding: 2.5rem; color: var(--text-dim); grid-column: 1 / -1;">
+          🛡️ No security breaches or unauthorized logins recorded. System is secure.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Photo Modal Zoom -->
+  <div class="modal-overlay" id="photo-modal">
+    <div class="modal-content" style="max-width: 650px; text-align: center;">
+      <div class="modal-header">
+        <h3 style="color: #f87171; display: flex; align-items: center; gap: 0.5rem;">
+          🚨 Intruder Photo Evidence
+        </h3>
+        <button class="modal-close" id="btn-close-photo-modal">&times;</button>
+      </div>
+      <img id="modal-photo-img" src="" alt="Captured Intruder" style="width: 100%; max-height: 440px; object-fit: contain; border-radius: var(--radius-md); border: 2px solid #ef4444; margin-bottom: 1rem;">
+      <div id="modal-photo-meta" style="font-size: 0.85rem; color: var(--text-muted); text-align: left; line-height: 1.6;"></div>
+    </div>
+  </div>
+
+  <footer class="app-footer" id="app-footer"></footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
