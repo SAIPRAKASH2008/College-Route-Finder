@@ -34,7 +34,7 @@
       <section class="legal-section">
         <h2>1. Scope of the Service</h2>
         <p>
-          The <strong>College Bus Route Optimizer & Intruder Alert System</strong> provides campus transportation planning tools, including pickup point discovery, road distance graphs, algorithmic shortest path calculations (Dijkstra and A*), transit timetable coordination, and security terminal surveillance for college buses and shuttles.
+          The <strong>College Bus Route Optimizer & Intruder Alert System</strong> provides campus transportation planning tools, including pickup point discovery, road distance graphs, Kruskal minimum-spanning-tree-based routes, Prim network optimization, Nearest Neighbour tours, transit timetable coordination, and security terminal surveillance for college buses and shuttles.
         </p>
       </section>
 
@@ -53,7 +53,7 @@
       <section class="legal-section">
         <h2>3. Algorithmic Transit Estimates & Route Disclaimer</h2>
         <p>
-          All route visualizations, shortest paths, and travel distance calculations provided by this application are mathematical approximations computed using road network graph algorithms (such as Dijkstra's Algorithm and A* Search).
+          Route visualizations and distance calculations are approximations based on the configured road network. Point-to-point routes follow the minimum spanning tree and are not guaranteed to be the shortest possible path; Nearest Neighbour tours use Dijkstra internally when selecting transitions between stops.
         </p>
         <p>
           <strong>No Guarantee of Real-Time Arrival:</strong> Actual transit duration may vary due to dynamic road conditions, traffic congestion, weather events, detours, or mechanical issues. The college transit system does not warrant that bus schedules will be completely error-free or uninterrupted. Users are advised to plan accordingly.
@@ -121,7 +121,6 @@
 
   <footer class="app-footer" id="app-footer"></footer>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
 </body>
 </html>

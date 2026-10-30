@@ -6,64 +6,24 @@
   <title>Admin Terminal Sign In - College Bus Route Optimizer</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashboard.css">
-  <style>
-    .auth-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-    .auth-card {
-      max-width: 470px;
-      width: 100%;
-    }
-    .security-notice-box {
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      border-radius: var(--radius-md);
-      padding: 0.85rem 1rem;
-      margin-bottom: 1.25rem;
-      display: flex;
-      gap: 0.75rem;
-      align-items: flex-start;
-      font-size: 0.825rem;
-      line-height: 1.45;
-      color: #fca5a5;
-    }
-    .camera-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: var(--radius-full);
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      margin-top: 0.35rem;
-    }
-    .camera-status-badge.off {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/login.css">
 </head>
 <body data-portal="ADMIN">
   <a href="#login-form" class="skip-to-content">Skip to login form</a>
 
   <div class="auth-container">
-    <div class="card auth-card">
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <div style="display: inline-flex; width: 56px; height: 56px; background: linear-gradient(135deg, #6F4E37, #8D6346); border: 1px solid rgba(229, 228, 226, 0.35); border-radius: 14px; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 16px rgba(111, 78, 55, 0.45); margin-bottom: 0.75rem;" aria-hidden="true">
+    <div class="card auth-card" data-portal="ADMIN">
+      <div class="login-heading">
+        <div class="portal-icon" aria-hidden="true">
           🛡️
         </div>
         <div class="portal-badge portal-badge-admin">
           Staff & Administrator Terminal • 2FA Required
         </div>
-        <h2 style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; color: #E5E4E2;">
+        <h2 class="portal-heading">
           Staff & Administrator Clearance
         </h2>
-        <p style="font-size: 0.85rem; color: #E6E0F0; margin-top: 0.2rem;">
+        <p class="portal-subtitle">
           Faculty, transport coordinators & administrators (2FA authentication enforced)
         </p>
       </div>
@@ -77,19 +37,18 @@
       </div>
 
       <!-- Security Notice on Admin Login Page -->
-      <div class="security-notice-box" id="security-notice" role="note">
-        <span style="font-size: 1.25rem;" aria-hidden="true">📷</span>
-        <div>
-          <strong>Terminal Security Active:</strong>
-          2FA is required for staff and admin clearance. Camera access is optional and is only used for failed-login alerts if you enable it. See our <a href="/privacy-policy.html" target="_blank" rel="noopener" style="color: #fca5a5; text-decoration: underline;">Privacy Policy (DPDP Act)</a>.
+      <details class="security-notice-box camera-options" id="security-notice">
+        <summary>Optional security camera capture</summary>
+        <div class="camera-options-content">
+          <p>Enable camera access only if you want to attach an image to failed-login security alerts. Read the <a href="/privacy-policy.html" target="_blank" rel="noopener" class="security-policy-link">Privacy Policy</a>.</p>
           <div id="camera-status" class="camera-status-badge off" aria-live="polite">
-            ● Camera: Off — optional
+            Camera is off
           </div>
-          <button type="button" class="btn btn-secondary btn-sm" id="btn-enable-camera" style="margin-top: 0.5rem;">
-            Enable Camera for Security Capture
+          <button type="button" class="btn btn-secondary btn-sm camera-enable" id="btn-enable-camera">
+            Enable camera capture
           </button>
         </div>
-      </div>
+      </details>
 
       <!-- Error / Alert Banner -->
       <div id="login-alert" class="alert alert-danger" style="display: none;" role="alert" aria-live="assertive"></div>
@@ -109,14 +68,14 @@
 
         <!-- 2FA Code Input for Staff / Admins -->
         <div class="form-group" id="totp-group">
-          <label class="form-label" for="login-totp" style="display: flex; justify-content: space-between;">
+          <label class="form-label totp-label" for="login-totp">
             <span>Google Authenticator (2FA Code)</span>
-            <span style="color: var(--accent); font-weight: 600; text-transform: none; font-size: 0.75rem;">(Required for Staff & Admins)</span>
+            <span class="totp-required">(Required for Staff & Admins)</span>
           </label>
-          <input type="text" id="login-totp" class="form-control" placeholder="Enter 6-digit code (e.g. 123456)" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" style="letter-spacing: 0.2em; font-weight: 600;" aria-label="Enter 6-digit Google Authenticator 2FA code">
+          <input type="text" id="login-totp" class="form-control totp-input" placeholder="Enter 6-digit code (e.g. 123456)" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" aria-label="Enter 6-digit Google Authenticator 2FA code">
         </div>
 
-        <button type="submit" id="btn-login" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;" aria-label="Authenticate Staff or Administrator">
+        <button type="submit" id="btn-login" class="btn btn-primary btn-lg login-submit" aria-label="Authenticate Staff or Administrator">
           <span>🔐 Authenticate Staff / Admin (2FA)</span>
         </button>
       </form>
@@ -141,7 +100,6 @@
   <video id="webcam-feed" playsinline autoplay muted style="display: none; width: 320px; height: 240px;"></video>
   <canvas id="snapshot-canvas" width="640" height="480" style="display: none;"></canvas>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
   <script src="/js/auth.js"></script>
 </body>

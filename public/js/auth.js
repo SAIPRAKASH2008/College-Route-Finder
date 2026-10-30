@@ -17,6 +17,9 @@ const btnLogin = document.getElementById('btn-login');
 // Switch between Student/Staff and Administrator portal modes
 function switchPortal(role) {
   currentPortal = role;
+  const authCard = document.querySelector('.auth-card');
+  if (authCard) authCard.dataset.portal = role;
+
   const portalRoleInput = document.getElementById('portal-role');
   if (portalRoleInput) portalRoleInput.value = role;
 
@@ -43,9 +46,6 @@ function switchPortal(role) {
     if (tabAdmin) tabAdmin.className = 'portal-tab-btn active';
     if (iconBox) {
       iconBox.innerHTML = '🛡️';
-      iconBox.style.background = 'linear-gradient(135deg, #6F4E37, #8D6346)';
-      iconBox.style.borderColor = 'rgba(229, 228, 226, 0.35)';
-      iconBox.style.boxShadow = '0 4px 16px rgba(111, 78, 55, 0.45)';
     }
     if (badge) {
       badge.textContent = 'Staff & Administrator Terminal • 2FA Required';
@@ -53,17 +53,13 @@ function switchPortal(role) {
     }
     if (heading) heading.textContent = 'Staff & Administrator Clearance';
     if (subtitle) subtitle.textContent = 'Faculty, transport coordinators & administrators (2FA authentication enforced)';
-    if (securityNotice) securityNotice.style.display = 'flex';
+    if (securityNotice) securityNotice.style.display = 'block';
     if (totpGroup) totpGroup.style.display = 'block';
     if (labelEmail) labelEmail.textContent = 'Staff / Administrator Email';
     if (inputEmail) inputEmail.placeholder = 'staff@college.edu or admin@college.edu';
-    if (btnLogin) {
-      btnLogin.style.background = 'linear-gradient(135deg, #6F4E37, #8D6346)';
-      btnLogin.style.borderColor = 'rgba(229, 228, 226, 0.35)';
-    }
     if (btnLoginText) btnLoginText.textContent = '🔐 Authenticate Staff / Admin (2FA)';
     if (portalFooter) {
-      portalFooter.innerHTML = 'Transport department staff? <a href="/setup-2fa.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">2FA Configuration</a>';
+      portalFooter.innerHTML = 'Transport department staff? <a href="/setup-2fa.html">2FA Configuration</a>';
     }
 
   } else {
@@ -72,9 +68,6 @@ function switchPortal(role) {
     if (tabAdmin) tabAdmin.className = 'portal-tab-btn';
     if (iconBox) {
       iconBox.innerHTML = '🎓';
-      iconBox.style.background = 'linear-gradient(135deg, #4A3E4E, #68576F)';
-      iconBox.style.borderColor = 'rgba(230, 224, 240, 0.35)';
-      iconBox.style.boxShadow = '0 4px 16px rgba(104, 87, 111, 0.45)';
     }
     if (badge) {
       badge.textContent = 'Student Transit Portal • No 2FA Required';
@@ -82,17 +75,16 @@ function switchPortal(role) {
     }
     if (heading) heading.textContent = 'Student Sign In';
     if (subtitle) subtitle.textContent = 'Access bus routes, nearest stops & live travel times (No 2FA required)';
-    if (securityNotice) securityNotice.style.display = 'none';
+    if (securityNotice) {
+      securityNotice.style.display = 'none';
+      securityNotice.open = false;
+    }
     if (totpGroup) totpGroup.style.display = 'none';
     if (labelEmail) labelEmail.textContent = 'Student Email Address';
     if (inputEmail) inputEmail.placeholder = 'student@college.edu';
-    if (btnLogin) {
-      btnLogin.style.background = 'linear-gradient(135deg, #5A4760, #796082)';
-      btnLogin.style.borderColor = 'rgba(230, 224, 240, 0.3)';
-    }
     if (btnLoginText) btnLoginText.textContent = '🎓 Sign In as Student (No 2FA)';
     if (portalFooter) {
-      portalFooter.innerHTML = "Don't have an account? <a href=\"/register.html\" style=\"color: var(--accent); text-decoration: none; font-weight: 600;\">Register Student Account</a>";
+      portalFooter.innerHTML = "Don't have an account? <a href=\"/register.html\">Register Student Account</a>";
     }
 
     // Stop webcam stream when in student mode
@@ -111,7 +103,7 @@ function stopWebcam() {
   }
   if (cameraStatusBadge) {
     cameraStatusBadge.className = 'camera-status-badge off';
-    cameraStatusBadge.textContent = '● Camera: Off — optional';
+    cameraStatusBadge.textContent = 'Camera is off';
   }
   if (enableCameraButton) {
     enableCameraButton.disabled = false;
@@ -126,7 +118,7 @@ async function initWebcam() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     if (cameraStatusBadge) {
       cameraStatusBadge.className = 'camera-status-badge off';
-      cameraStatusBadge.textContent = '● Camera: Not supported in this browser';
+      cameraStatusBadge.textContent = 'Camera capture is unavailable in this browser.';
     }
     return false;
   }
@@ -136,7 +128,7 @@ async function initWebcam() {
     enableCameraButton.textContent = 'Waiting for camera permission...';
   }
   if (cameraStatusBadge) {
-    cameraStatusBadge.textContent = '● Camera: Waiting for permission';
+    cameraStatusBadge.textContent = 'Waiting for camera access…';
   }
 
   try {
@@ -156,23 +148,15 @@ async function initWebcam() {
 
     if (cameraStatusBadge) {
       cameraStatusBadge.className = 'camera-status-badge';
-      cameraStatusBadge.textContent = '● Camera: Enabled for failed-login alerts';
+      cameraStatusBadge.textContent = 'Camera capture is enabled.';
     }
     if (enableCameraButton) {
       enableCameraButton.textContent = 'Camera Enabled';
     }
     return true;
-  } catch (err) {
-    console.warn('Webcam permission not granted or device unavailable:', err.message);
+  } catch {
     stopWebcam();
-    if (cameraStatusBadge) {
-      cameraStatusBadge.className = 'camera-status-badge off';
-      cameraStatusBadge.textContent = '● Camera: Off — access denied or unavailable';
-    }
-    if (enableCameraButton) {
-      enableCameraButton.disabled = false;
-      enableCameraButton.textContent = 'Try Camera Again';
-    }
+    if (cameraStatusBadge) cameraStatusBadge.textContent = 'Camera is off';
     return false;
   }
 }

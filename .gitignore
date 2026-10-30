@@ -2,10 +2,11 @@
 .env.*
 !.env.example
 node_modules/
+backend/target/
+target/
 database.sqlite
 database.sqlite-*
 public/uploads/intruders/*
 !public/uploads/intruders/.gitkeep
 npm-debug.log*
 yarn-debug.log*
-

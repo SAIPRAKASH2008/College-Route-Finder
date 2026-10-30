@@ -3,7 +3,7 @@ const router = express.Router();
 const { dbAsync } = require('../config/db');
 const { verifyToken, requireAdmin } = require('../middleware/auth');
 const Graph = require('../algorithms/graph');
-const dijkstra = require('../algorithms/dijkstra');
+const kruskalRoute = require('../algorithms/kruskal');
 const primMST = require('../algorithms/primMST');
 const nearestNeighbourRoute = require('../algorithms/nearestNeighbour');
 
@@ -27,7 +27,7 @@ async function buildGraphFromDb() {
 
 /**
  * POST /api/route/compute
- * Runs Dijkstra, Prim's MST, or Nearest Neighbour
+ * Runs Kruskal's MST-based point-to-point route, Prim's MST, or Nearest Neighbour
  */
 router.post('/compute', verifyToken, async (req, res) => {
   try {
@@ -43,15 +43,18 @@ router.post('/compute', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'No road connections (edges) have been defined yet. Please add edges first.' });
     }
 
-    const algo = (algorithm || 'DIJKSTRA').toUpperCase();
+    const algo = (algorithm || 'KRUSKAL').toUpperCase();
     let result = null;
 
-    if (algo === 'DIJKSTRA') {
+    if (algo === 'KRUSKAL') {
       if (!startId || !endId) {
-        return res.status(400).json({ error: 'Start stop and destination stop are both required for Dijkstra shortest path.' });
+        return res.status(400).json({ error: 'Start stop and destination stop are both required for a Kruskal route.' });
       }
-      result = dijkstra(graph, startId, endId);
-      result.algorithm = 'DIJKSTRA';
+      if (!graph.getNode(startId) || !graph.getNode(endId)) {
+        return res.status(400).json({ error: 'The selected start or destination stop does not exist.' });
+      }
+      result = kruskalRoute(graph, startId, endId);
+      result.algorithm = 'KRUSKAL';
     } else if (algo === 'MST') {
       result = primMST(graph, startId);
       result.algorithm = 'MST';
@@ -59,7 +62,7 @@ router.post('/compute', verifyToken, async (req, res) => {
       result = nearestNeighbourRoute(graph, startId, returnToCollege !== false);
       result.algorithm = 'NEAREST_NEIGHBOUR';
     } else {
-      return res.status(400).json({ error: `Unsupported algorithm "${algo}". Choose DIJKSTRA, MST, or NEAREST_NEIGHBOUR.` });
+      return res.status(400).json({ error: `Unsupported algorithm "${algo}". Choose KRUSKAL, MST, or NEAREST_NEIGHBOUR.` });
     }
 
     // Attach algorithm benchmark comparison metrics

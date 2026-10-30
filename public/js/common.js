@@ -1,10 +1,19 @@
 /**
- * Common Utilities, Authentication Helpers, Socket.io, and Notifications
+ * Common Utilities, Authentication Helpers, live events, and Notifications
  * College Bus Route Optimizer & Intruder Alert Subsystem
  */
 
 const API_BASE = '';
-let socket = null;
+const liveEventHandlers = new Map();
+
+function onLiveEvent(eventName, handler) {
+  if (!liveEventHandlers.has(eventName)) liveEventHandlers.set(eventName, []);
+  liveEventHandlers.get(eventName).push(handler);
+}
+
+function dispatchLiveEvent(eventName, data) {
+  (liveEventHandlers.get(eventName) || []).forEach((handler) => handler(data));
+}
 
 // ==========================================
 // Authentication & Storage Helpers
@@ -30,10 +39,11 @@ function setUser(user) {
   localStorage.setItem('user', JSON.stringify(user));
 }
 
-function logout() {
+function logout(event) {
+  if (event) event.preventDefault();
   localStorage.removeItem('token');
   localStorage.removeItem('user');
-  window.location.href = '/index.html';
+  window.location.replace('/index.html?logout=1');
 }
 
 function checkAuth(requireRole = null) {
@@ -230,7 +240,7 @@ function renderNavbar(activePage = '') {
             <span style="font-weight: 600;">${user.name}</span>
             <span class="role-badge ${isAdmin ? 'admin' : 'user'}">${user.role}</span>
           </div>
-          <button onclick="logout()" class="btn btn-secondary btn-sm" title="Log Out" aria-label="Log Out of your account">
+          <button type="button" id="btn-logout" class="btn btn-secondary btn-sm" title="Log Out" aria-label="Log Out of your account">
             🚪 Logout
           </button>
         ` : `
@@ -239,6 +249,8 @@ function renderNavbar(activePage = '') {
       </div>
     </nav>
   `;
+
+  navContainer.querySelector('#btn-logout')?.addEventListener('click', logout);
 }
 
 // ==========================================
@@ -273,7 +285,7 @@ function renderFooter() {
         <strong>Campus Transit Operations & Bus Route Optimizer</strong><br>
         Campus Transportation Dept., University Road, India • Support & Grievance: <a href="mailto:saiprakash9813@gmail.com" style="color: var(--accent);">saiprakash9813@gmail.com</a><br>
         <span style="font-size: 0.72rem; opacity: 0.85;">
-          Transit estimates are mathematical approximations based on road network graphs and Dijkstra/A* pathfinding algorithms. Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color: var(--accent);">OpenStreetMap</a> contributors.
+          Transit estimates are approximations based on the campus road graph and its Kruskal, Prim, and Nearest Neighbour route algorithms. Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color: var(--accent);">OpenStreetMap</a> contributors.
         </span>
       </div>
 
@@ -359,32 +371,63 @@ function setCookieConsent(choice) {
 }
 
 // ==========================================
-// Socket.io Real-Time Stream Initializer
+// Server-Sent Events security stream
 // ==========================================
-function initSocket() {
-  if (typeof io === 'undefined') return;
-
-  socket = io();
-
+function initRealtime() {
   const user = getUser();
   const token = getToken();
-
-  if (user && user.role === 'ADMIN' && token) {
-    socket.emit('admin:join', token);
+  if (user && user.role === 'ADMIN' && token && window.ReadableStream && window.fetch) {
+    const connect = async () => {
+      while (getToken() === token) {
+        try {
+          const response = await fetch('/api/security/events', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html?expired=1';
+            return;
+          }
+          if (response.status === 403 || !response.ok || !response.body) return;
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          while (true) {
+            const result = await reader.read();
+            if (result.done) break;
+            buffer += decoder.decode(result.value, { stream: true });
+            let boundary;
+            while ((boundary = buffer.search(/\r?\n\r?\n/)) !== -1) {
+              const message = buffer.slice(0, boundary);
+              buffer = buffer.slice(boundary).replace(/^\r?\n\r?\n/, '');
+              const eventName = message.match(/^event:\s*(.+)$/m)?.[1];
+              const data = message.match(/^data:\s*(.+)$/m)?.[1];
+              if (!eventName || !data) continue;
+              try { dispatchLiveEvent(eventName, JSON.parse(data)); } catch (error) { }
+            }
+          }
+        } catch (error) { }
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
+    };
+    connect();
   }
 
-  // Only emit analytics visitor ping if user accepted all cookies
   const consent = localStorage.getItem('cookie_consent');
   if (consent !== 'essential') {
-    socket.emit('visitor:ping', {
-      page: window.location.pathname,
-      userAgent: navigator.userAgent,
-      referrer: document.referrer
-    });
+    fetch('/api/visitor/ping', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        page: window.location.pathname,
+        userAgent: navigator.userAgent,
+        referrer: document.referrer
+      })
+    }).catch(() => {});
   }
 
-  // Global intruder security listener
-  socket.on('security:intruder', (data) => {
+  onLiveEvent('security:intruder', (data) => {
     playSecurityAlertSound();
     showToast(`🚨 SECURITY ALERT: Unauthorized login attempt from IP ${data.ipAddress}!`, 'security', 8000);
     showDesktopNotification(
@@ -397,7 +440,7 @@ function initSocket() {
 // Auto-run on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   requestNotificationPermission();
-  initSocket();
+  initRealtime();
   renderFooter();
   initCookieConsent();
 });

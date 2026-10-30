@@ -53,8 +53,10 @@ function renderSavedTable(routes) {
 
   tbody.innerHTML = routes.map(r => {
     let algoBadge = '';
-    if (r.algorithm === 'DIJKSTRA') {
-      algoBadge = '<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">Dijkstra</span>';
+    if (r.algorithm === 'KRUSKAL') {
+      algoBadge = '<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">Kruskal Route</span>';
+    } else if (r.algorithm === 'DIJKSTRA') {
+      algoBadge = '<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">Dijkstra (legacy)</span>';
     } else if (r.algorithm === 'MST') {
       algoBadge = '<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">Prim MST</span>';
     } else {

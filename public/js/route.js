@@ -22,7 +22,7 @@ async function initRoutePage() {
   // Algorithm selection switcher
   algoSelect.addEventListener('change', () => {
     const val = algoSelect.value;
-    if (val === 'DIJKSTRA') {
+    if (val === 'KRUSKAL') {
       destGroup.style.display = 'block';
       destStopSelect.required = true;
       returnGroup.style.display = 'none';
@@ -228,7 +228,7 @@ function renderRouteResult(data, algo) {
     highlightPathOnGraph(data.visitedStops, data.mstEdges, true);
 
   } else {
-    // Dijkstra or Nearest Neighbour
+    // Kruskal route or Nearest Neighbour
     if (!data.segments || data.segments.length === 0) {
       stepsList.innerHTML = `
         <li class="step-item">
@@ -250,7 +250,7 @@ function renderRouteResult(data, algo) {
     }
 
     // Highlight on graph
-    highlightPathOnGraph(data.path, data.segments, false);
+    highlightPathOnGraph(data.path, data.segments, false, algo === 'NEAREST_NEIGHBOUR');
   }
 
   // Setup Google Maps turn-by-turn navigation button

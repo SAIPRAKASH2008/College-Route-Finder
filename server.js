@@ -119,7 +119,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error: ' + err.message });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8500;
 
 async function startServer() {
   try {

@@ -24,30 +24,26 @@ async function initDashboard() {
     loadGraphStatsForUser();
   }
 
-  // Socket.io Real-time event listeners
-  if (typeof socket !== 'undefined' && socket) {
-    // Live visitor arrival event
-    socket.on('visitor:arrive', (visitor) => {
-      appendVisitorItem(visitor);
-      const statElem = document.getElementById('stat-visitors');
-      if (statElem && statElem.textContent !== '—') {
-        statElem.textContent = parseInt(statElem.textContent || '0', 10) + 1;
-      }
-      showDesktopNotification(
-        '🌐 New Visitor Arrived',
-        `Page: ${visitor.page} | IP: ${visitor.ip}`
-      );
-    });
+  // Server-Sent Events listeners
+  onLiveEvent('visitor:arrive', (visitor) => {
+    appendVisitorItem(visitor);
+    const statElem = document.getElementById('stat-visitors');
+    if (statElem && statElem.textContent !== '—') {
+      statElem.textContent = parseInt(statElem.textContent || '0', 10) + 1;
+    }
+    showDesktopNotification(
+      '🌐 New Visitor Arrived',
+      `Page: ${visitor.page} | IP: ${visitor.ip}`
+    );
+  });
 
-    // Real-time intruder breach event
-    socket.on('security:intruder', (intruder) => {
-      appendIntruderCard(intruder);
-      const statElem = document.getElementById('stat-intruders');
-      if (statElem) {
-        statElem.textContent = parseInt(statElem.textContent || '0', 10) + 1;
-      }
-    });
-  }
+  onLiveEvent('security:intruder', (intruder) => {
+    appendIntruderCard(intruder);
+    const statElem = document.getElementById('stat-intruders');
+    if (statElem) {
+      statElem.textContent = parseInt(statElem.textContent || '0', 10) + 1;
+    }
+  });
 }
 
 // Load statistics

@@ -22,7 +22,7 @@
           <span>🧭</span> Graph Route Optimizer
         </h1>
         <p class="page-subtitle">
-          Apply Dijkstra's Shortest Path, Prim's Minimum Spanning Tree (MST), or Nearest Neighbour TSP tour on the campus bus network
+          Use Kruskal's Minimum Spanning Tree to find a route between two stops, Prim's MST to optimize the network, or Nearest Neighbour for an all-stops tour
         </p>
       </div>
       <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
@@ -60,7 +60,7 @@
             <div class="form-group">
               <label class="form-label" for="algo-select">Graph Algorithm *</label>
               <select id="algo-select" class="form-select">
-                <option value="DIJKSTRA" selected>Dijkstra's Algorithm (Point-to-Point Shortest Path)</option>
+                <option value="KRUSKAL" selected>Kruskal's Algorithm (MST-Based Route Between Stops)</option>
                 <option value="NEAREST_NEIGHBOUR">Nearest Neighbour Heuristic (Visit All Stops Tour)</option>
                 <option value="MST">Prim's Algorithm (Minimum Spanning Tree Network)</option>
               </select>
@@ -122,7 +122,7 @@
                 <strong id="bench-current">0 km</strong>
               </div>
               <div class="progress-bar-bg">
-                <div class="progress-bar-fill dijkstra" id="bar-current" style="width: 60%;"></div>
+                <div class="progress-bar-fill kruskal" id="bar-current" style="width: 60%;"></div>
               </div>
             </div>
 
@@ -160,12 +160,22 @@
           <div id="network-canvas"></div>
           <div id="geomap-canvas" style="display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 5;"></div>
 
+          <div class="graph-search-controls">
+            <label class="sr-only" for="graph-search">Find a stop</label>
+            <input id="graph-search" type="search" list="graph-stop-options" placeholder="Find a stop…" autocomplete="off">
+            <datalist id="graph-stop-options"></datalist>
+            <button type="button" class="graph-action-btn" onclick="searchGraphStop()">Search</button>
+          </div>
+
           <!-- Floating Map Controls -->
           <div class="canvas-floating-controls">
-            <button class="floating-btn" onclick="zoomIn()" title="Zoom In">+</button>
-            <button class="floating-btn" onclick="zoomOut()" title="Zoom Out">−</button>
-            <button class="floating-btn" onclick="fitGraph()" title="Fit Whole Graph">⛶</button>
-            <button class="floating-btn" onclick="togglePhysics()" title="Toggle Physics Simulation" id="btn-physics">⚡</button>
+            <button class="floating-btn" onclick="zoomIn()" title="Zoom In" aria-label="Zoom in">+</button>
+            <button class="floating-btn" onclick="zoomOut()" title="Zoom Out" aria-label="Zoom out">−</button>
+            <button class="floating-btn" onclick="fitGraph()" title="Fit Whole Graph" aria-label="Fit graph">⛶</button>
+            <button class="floating-btn" onclick="rearrangeGraph()" title="Re-arrange graph">↻</button>
+            <button class="floating-btn" onclick="toggleGeoLayout()" title="Toggle geographic layout" id="btn-geo-layout" aria-pressed="false">🌐</button>
+            <button class="floating-btn" onclick="togglePhysics()" title="Run layout simulation" id="btn-physics" aria-label="Toggle physics simulation" aria-pressed="false">⚡</button>
+            <button class="floating-btn graph-clear-btn" onclick="clearGraphHighlight()" title="Clear highlight">Clear</button>
           </div>
 
           <!-- Map Legend -->
@@ -181,6 +191,10 @@
             <div class="legend-item">
               <div class="legend-dot route"></div>
               <span>Optimized Path</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot dimmed"></div>
+              <span>Dimmed</span>
             </div>
           </div>
         </div>
@@ -226,7 +240,6 @@
 
   <footer class="app-footer" id="app-footer"></footer>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
   <script src="/js/graph.js"></script>
   <script src="/js/route.js"></script>

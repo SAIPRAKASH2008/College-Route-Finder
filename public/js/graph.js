@@ -6,7 +6,124 @@ let network = null;
 let networkData = { nodes: null, edges: null };
 let rawNodes = [];
 let rawEdges = [];
-let physicsEnabled = true;
+let physicsEnabled = false;
+let geoLayoutEnabled = false;
+let highlightedNodeIds = new Set();
+let highlightedEdgeIds = new Set();
+let focusedNodeId = null;
+let hoveredEdgeId = null;
+let selectedEdgeIds = new Set();
+let highlightedTourOrder = null;
+
+const GRAPH_COLORS = {
+  campus: '#f2c66d',
+  stop: '#a9c5d8',
+  path: '#37c6b0',
+  dim: '#33414b',
+  edge: 'rgba(177, 194, 205, 0.2)',
+  dimEdge: 'rgba(148, 163, 184, 0.07)'
+};
+
+function isCoordinate(value) {
+  return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
+}
+
+function fullNodeName(node) {
+  return String(node.name || node.label || `Stop ${node.id}`);
+}
+
+function escapeGraphHtml(value) {
+  return String(value).replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+}
+
+function shortNodeLabel(name) {
+  const words = name.length > 18 ? `${name.slice(0, 17).trimEnd()}…` : name;
+  const breakAt = words.lastIndexOf(' ', 12);
+  const splitAt = breakAt > 5 ? breakAt : (words.length > 12 ? 12 : -1);
+  return splitAt > 0
+    ? `${escapeGraphHtml(words.slice(0, splitAt))}<br>${escapeGraphHtml(words.slice(splitAt).trim())}`
+    : escapeGraphHtml(words);
+}
+
+function nodeStyle(node, dimmed = false, order = null, highlighted = false) {
+  const campus = Boolean(node.is_college);
+  const background = dimmed
+    ? GRAPH_COLORS.dim
+    : (highlighted && !campus ? GRAPH_COLORS.path : (campus ? GRAPH_COLORS.campus : GRAPH_COLORS.stop));
+  const border = dimmed ? '#53616a' : (highlighted ? '#e5fff9' : (campus ? '#fff1c8' : '#e5f2fa'));
+  const label = order === null
+    ? shortNodeLabel(fullNodeName(node))
+    : `${order}. ${shortNodeLabel(fullNodeName(node))}`;
+
+  return {
+    label,
+    title: fullNodeName(node),
+    shape: campus ? 'hexagon' : 'dot',
+    size: campus ? 25 : (highlighted ? 15 : 11),
+    color: {
+      background,
+      border,
+      highlight: { background: GRAPH_COLORS.path, border: '#e5fff9' },
+      hover: { background: GRAPH_COLORS.path, border: '#e5fff9' }
+    },
+    borderWidth: campus ? 3 : 1.5,
+    fixed: campus,
+    font: {
+      color: dimmed ? '#86939b' : '#eef4f7',
+      size: 13,
+      face: 'Inter, system-ui, sans-serif',
+      bold: campus || order !== null,
+      multi: 'html',
+      background: 'rgba(12, 18, 24, 0.82)',
+      strokeWidth: 0,
+      vadjust: 14,
+      align: 'center'
+    },
+    shadow: { enabled: !dimmed, color: 'rgba(0,0,0,0.35)', size: 7, x: 0, y: 3 }
+  };
+}
+
+function nodeLabelWithConnections(node) {
+  const connected = rawEdges
+    .filter(edge => String(edge.from) === String(node.id) || String(edge.to) === String(node.id))
+    .map(edge => {
+      const otherId = String(edge.from) === String(node.id) ? edge.to : edge.from;
+      const other = rawNodes.find(candidate => String(candidate.id) === String(otherId));
+      return other ? `${fullNodeName(other)} (${edge.distance} km)` : null;
+    })
+    .filter(Boolean);
+
+  return connected.length
+    ? `${fullNodeName(node)}\nConnected roads:\n${connected.join('\n')}`
+    : fullNodeName(node);
+}
+
+function edgeStyle(edge, dimmed = false, highlighted = false, showLabel = false) {
+  return {
+    label: showLabel ? String(edge.distanceLabel || `${edge.distance} km`) : '',
+    title: `${edge.distance} km`,
+    width: highlighted ? 4 : 1.5,
+    color: {
+      color: dimmed ? GRAPH_COLORS.dimEdge : (highlighted ? GRAPH_COLORS.path : GRAPH_COLORS.edge),
+      highlight: GRAPH_COLORS.path,
+      hover: GRAPH_COLORS.path
+    },
+    font: {
+      align: 'horizontal',
+      size: 12,
+      color: '#e6f4f2',
+      background: 'rgba(10, 20, 25, 0.9)',
+      strokeWidth: 0
+    },
+    smooth: { enabled: false }
+  };
+}
 
 async function initNetworkGraph() {
   const container = document.getElementById('network-canvas');
@@ -32,6 +149,9 @@ async function initNetworkGraph() {
       return;
     }
 
+    rawNodes = rawNodes.map(node => ({ ...node, ...nodeStyle(node) }));
+    rawEdges = rawEdges.map(edge => ({ ...edge, ...edgeStyle(edge) }));
+
     const nodesDataSet = new vis.DataSet(rawNodes);
     const edgesDataSet = new vis.DataSet(rawEdges);
 
@@ -45,32 +165,91 @@ async function initNetworkGraph() {
         enabled: true,
         solver: 'forceAtlas2Based',
         forceAtlas2Based: {
-          gravitationalConstant: -70,
-          centralGravity: 0.015,
-          springLength: 140,
-          springConstant: 0.08,
-          damping: 0.4
+          gravitationalConstant: -130,
+          centralGravity: 0.008,
+          springLength: 230,
+          springConstant: 0.035,
+          damping: 0.62,
+          avoidOverlap: 0.9
         },
-        stabilization: { iterations: 150 }
+        stabilization: { enabled: true, iterations: 500, fit: true }
       },
       interaction: {
         hover: true,
         dragNodes: true,
         zoomView: true,
         dragView: true,
-        tooltipDelay: 200
+        tooltipDelay: 250,
+        hideEdgesOnDrag: true
       },
-      nodes: {
-        borderWidth: 2,
-        shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 2, y: 4 }
-      },
-      edges: {
-        font: { align: 'middle', size: 11, background: 'rgba(15, 23, 42, 0.85)', color: '#94a3b8' },
-        smooth: { type: 'continuous' }
-      }
+      nodes: { chosen: true },
+      edges: { chosen: false },
+      layout: { improvedLayout: true, randomSeed: 42 }
     };
 
     network = new vis.Network(container, networkData, options);
+    const campus = rawNodes.find(node => node.is_college);
+    if (campus) {
+      network.moveNode(campus.id, 0, 0);
+    }
+
+    network.once('stabilizationIterationsDone', () => {
+      network.setOptions({ physics: { enabled: false } });
+      physicsEnabled = false;
+      updatePhysicsButton();
+      network.fit({ animation: { duration: 450, easingFunction: 'easeInOutQuad' } });
+    });
+
+    network.on('hoverNode', ({ node }) => {
+      const dataNode = rawNodes.find(candidate => String(candidate.id) === String(node));
+      const title = dataNode ? nodeLabelWithConnections(dataNode) : '';
+      if (title) networkData.nodes.update({ id: node, title });
+    });
+    network.on('blurNode', ({ node }) => {
+      const dataNode = rawNodes.find(candidate => String(candidate.id) === String(node));
+      if (dataNode) networkData.nodes.update({ id: node, title: fullNodeName(dataNode) });
+    });
+    network.on('hoverEdge', ({ edge }) => {
+      hoveredEdgeId = edge;
+      refreshGraphStyles();
+    });
+    network.on('blurEdge', () => {
+      hoveredEdgeId = null;
+      refreshGraphStyles();
+    });
+    network.on('selectEdge', ({ edges }) => {
+      selectedEdgeIds = new Set(edges);
+      refreshGraphStyles();
+    });
+    network.on('click', ({ nodes, edges }) => {
+      if (nodes.length) {
+        focusGraphNode(nodes[0]);
+      } else if (edges.length) {
+        selectedEdgeIds = new Set(edges);
+        refreshGraphStyles();
+      }
+    });
+
+    const search = document.getElementById('graph-search');
+    const datalist = document.getElementById('graph-stop-options');
+    if (search && datalist) {
+      datalist.replaceChildren(...rawNodes.map(node => {
+        const option = document.createElement('option');
+        option.value = fullNodeName(node);
+        return option;
+      }));
+      search.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          searchGraphStop();
+        }
+      });
+    }
+
+    const geoLayoutButton = document.getElementById('btn-geo-layout');
+    if (geoLayoutButton) {
+      geoLayoutButton.disabled = !rawNodes.some(node => isCoordinate(node.latitude) && isCoordinate(node.longitude));
+    }
 
   } catch (err) {
     console.error('Error initializing network graph:', err);
@@ -80,79 +259,34 @@ async function initNetworkGraph() {
 /**
  * Highlights computed path nodes and road edges on the canvas
  */
-function highlightPathOnGraph(pathStopIds = [], segments = [], isMst = false) {
+function highlightPathOnGraph(pathStopIds = [], segments = [], isMst = false, isTour = false) {
   if (!network || !networkData.nodes || !networkData.edges) return;
 
-  // 1. Reset all nodes & edges to normal default styling
-  resetGraphStyles();
+  highlightedNodeIds = new Set(pathStopIds.map(String));
+  highlightedEdgeIds = new Set();
+  selectedEdgeIds.clear();
+  focusedNodeId = null;
+  highlightedTourOrder = isTour ? pathStopIds : null;
 
-  const pathSet = new Set(pathStopIds.map(Number));
-
-  // 2. Highlight traversed nodes
-  const updatedNodes = [];
-  networkData.nodes.forEach(node => {
-    if (pathSet.has(Number(node.id))) {
-      updatedNodes.push({
-        id: node.id,
-        color: {
-          background: node.is_college ? '#6F4E37' : '#8D6346',
-          border: '#E5E4E2',
-          highlight: { background: '#E6E0F0', border: '#FFFFFF' }
-        },
-        size: node.is_college ? 32 : 24,
-        font: { color: '#FFFFFF', size: 14, bold: true }
-      });
-    }
-  });
-  networkData.nodes.update(updatedNodes);
-
-  // 3. Highlight edges in path or MST
-  const updatedEdges = [];
-
-  if (isMst) {
-    // For MST, highlight all MST edges
-    const mstEdgePairs = segments.map(s => [Number(s.sourceId), Number(s.destId)]);
-
-    networkData.edges.forEach(edge => {
-      const from = Number(edge.from);
-      const to = Number(edge.to);
-      const inMst = mstEdgePairs.some(([u, v]) => (u === from && v === to) || (u === to && v === from));
-
-      if (inMst) {
-        updatedEdges.push({
-          id: edge.id,
-          color: { color: '#E5E4E2', highlight: '#FFFFFF' },
-          width: 5,
-          font: { color: '#E5E4E2', bold: true, background: 'rgba(111, 78, 55, 0.45)' }
-        });
-      }
-    });
-  } else {
-    // For Dijkstra or Nearest Neighbour, highlight sequential segments
-    const segmentPairs = [];
+  const pairs = segments.map(segment => [
+    String(isMst ? segment.sourceId : (segment.fromId ?? segment.sourceId)),
+    String(isMst ? segment.destId : (segment.toId ?? segment.destId))
+  ]).filter(([from, to]) => from !== 'undefined' && to !== 'undefined');
+  if (!isMst && pairs.length === 0) {
     for (let i = 0; i < pathStopIds.length - 1; i++) {
-      segmentPairs.push([Number(pathStopIds[i]), Number(pathStopIds[i + 1])]);
+      pairs.push([String(pathStopIds[i]), String(pathStopIds[i + 1])]);
     }
-
-    networkData.edges.forEach(edge => {
-      const from = Number(edge.from);
-      const to = Number(edge.to);
-      const inPath = segmentPairs.some(([u, v]) => (u === from && v === to) || (u === to && v === from));
-
-      if (inPath) {
-        updatedEdges.push({
-          id: edge.id,
-          color: { color: '#6F4E37', highlight: '#8D6346' },
-          width: 5,
-          font: { color: '#E6E0F0', bold: true, background: 'rgba(111, 78, 55, 0.55)' }
-        });
-      }
-    });
   }
 
-  networkData.edges.update(updatedEdges);
+  rawEdges.forEach(edge => {
+    if (pairs.some(([from, to]) =>
+      (String(edge.from) === from && String(edge.to) === to) ||
+      (String(edge.from) === to && String(edge.to) === from))) {
+      highlightedEdgeIds.add(String(edge.id));
+    }
+  });
+  refreshGraphStyles();
 
-  // 4. Smoothly focus canvas view onto the path nodes
   if (pathStopIds.length > 0) {
     network.fit({
       nodes: pathStopIds,
@@ -160,32 +294,66 @@ function highlightPathOnGraph(pathStopIds = [], segments = [], isMst = false) {
     });
   }
 
-  // 5. Also highlight on geographic map
   highlightPathOnGeoMap(pathStopIds, segments, isMst);
 }
 
-function resetGraphStyles() {
+function refreshGraphStyles() {
   if (!networkData.nodes || !networkData.edges) return;
 
-  const resetNodes = rawNodes.map(n => ({
-    id: n.id,
-    color: n.color,
-    size: n.size,
-    font: n.font
-  }));
-  networkData.nodes.update(resetNodes);
+  const neighborIds = new Set();
+  if (focusedNodeId !== null) {
+    neighborIds.add(String(focusedNodeId));
+    rawEdges.forEach(edge => {
+      if (String(edge.from) === String(focusedNodeId)) neighborIds.add(String(edge.to));
+      if (String(edge.to) === String(focusedNodeId)) neighborIds.add(String(edge.from));
+    });
+  }
 
-  const resetEdges = rawEdges.map(e => ({
-    id: e.id,
-    color: e.color,
-    width: 2,
-    font: e.font
-  }));
-  networkData.edges.update(resetEdges);
+  const dimView = focusedNodeId !== null || highlightedNodeIds.size > 0;
+  const nodeUpdates = rawNodes.map(node => {
+    const id = String(node.id);
+    const inRoute = highlightedNodeIds.has(id);
+    const inFocus = neighborIds.has(id);
+    const dimmed = dimView && !(inRoute || inFocus);
+    const order = highlightedTourOrder && highlightedNodeIds.has(id)
+      ? highlightedTourOrder.map(String).indexOf(id) + 1
+      : null;
+    return {
+      id: node.id,
+      ...nodeStyle(node, dimmed, order, inRoute || String(focusedNodeId) === id)
+    };
+  });
+  networkData.nodes.update(nodeUpdates);
+
+  const edgeUpdates = rawEdges.map(edge => {
+    const id = String(edge.id);
+    const inRoute = highlightedEdgeIds.has(id);
+    const inFocus = neighborIds.has(String(edge.from)) && neighborIds.has(String(edge.to));
+    const dimmed = dimView && !(inRoute || inFocus);
+    const selected = selectedEdgeIds.has(edge.id);
+    return {
+      id: edge.id,
+      ...edgeStyle(edge, dimmed, inRoute, inRoute || selected || hoveredEdgeId === edge.id)
+    };
+  });
+  networkData.edges.update(edgeUpdates);
+}
+
+function clearGraphHighlight() {
+  highlightedNodeIds.clear();
+  highlightedEdgeIds.clear();
+  selectedEdgeIds.clear();
+  focusedNodeId = null;
+  highlightedTourOrder = null;
+  refreshGraphStyles();
+  if (geoMapRouteLayer && geoMap) {
+    geoMap.removeLayer(geoMapRouteLayer);
+    geoMapRouteLayer = null;
+  }
 }
 
 function resetGraphView() {
-  resetGraphStyles();
+  clearGraphHighlight();
   if (network) {
     network.fit({ animation: { duration: 600 } });
   }
@@ -211,8 +379,128 @@ function togglePhysics() {
   if (!network) return;
   physicsEnabled = !physicsEnabled;
   network.setOptions({ physics: { enabled: physicsEnabled } });
+  if (physicsEnabled) {
+    network.once('stabilizationIterationsDone', () => {
+      network.setOptions({ physics: { enabled: false } });
+      physicsEnabled = false;
+      updatePhysicsButton();
+    });
+    network.stabilize(250);
+  }
+  updatePhysicsButton();
+}
+
+function updatePhysicsButton() {
   const btn = document.getElementById('btn-physics');
-  if (btn) btn.style.color = physicsEnabled ? 'var(--accent)' : 'var(--text-muted)';
+  if (btn) {
+    btn.style.color = physicsEnabled ? 'var(--accent)' : 'var(--text-muted)';
+    btn.title = physicsEnabled ? 'Stop layout simulation' : 'Run layout simulation';
+    btn.setAttribute('aria-pressed', String(physicsEnabled));
+  }
+}
+
+function focusGraphNode(nodeId) {
+  focusedNodeId = nodeId;
+  highlightedNodeIds.clear();
+  highlightedEdgeIds.clear();
+  selectedEdgeIds.clear();
+  highlightedTourOrder = null;
+  refreshGraphStyles();
+  network.focus(nodeId, { scale: Math.max(network.getScale(), 1), animation: { duration: 450 } });
+}
+
+function searchGraphStop() {
+  const input = document.getElementById('graph-search');
+  if (!input || !network) return;
+  const query = input.value.trim().toLocaleLowerCase();
+  const node = rawNodes.find(candidate =>
+    fullNodeName(candidate).toLocaleLowerCase() === query ||
+    fullNodeName(candidate).toLocaleLowerCase().includes(query));
+  if (!node) {
+    input.setCustomValidity('No matching stop was found.');
+    input.reportValidity();
+    input.addEventListener('input', () => input.setCustomValidity(''), { once: true });
+    return;
+  }
+  input.setCustomValidity('');
+  focusGraphNode(node.id);
+}
+
+function toggleGeoLayout() {
+  if (!network) return;
+  const nodesWithCoordinates = rawNodes.filter(node =>
+    isCoordinate(node.latitude) && isCoordinate(node.longitude));
+  if (!nodesWithCoordinates.length) return;
+
+  geoLayoutEnabled = !geoLayoutEnabled;
+  const campus = rawNodes.find(node => node.is_college);
+  const centerLat = campus && isCoordinate(campus.latitude) ? Number(campus.latitude) : 0;
+  const centerLng = campus && isCoordinate(campus.longitude) ? Number(campus.longitude) : 0;
+  const scale = 9000;
+
+  if (geoLayoutEnabled) {
+    nodesWithCoordinates.forEach(node => {
+      network.moveNode(node.id, (Number(node.longitude) - centerLng) * scale, (centerLat - Number(node.latitude)) * scale);
+    });
+  } else {
+    arrangeGraphPositions();
+  }
+
+  const button = document.getElementById('btn-geo-layout');
+  if (button) {
+    button.setAttribute('aria-pressed', String(geoLayoutEnabled));
+    button.textContent = geoLayoutEnabled ? '🌐 Geo layout: On' : '🌐 Geo layout';
+  }
+  network.fit({ animation: { duration: 500 } });
+}
+
+function arrangeGraphPositions() {
+  if (!network || !rawNodes.length) return;
+  const campus = rawNodes.find(node => node.is_college);
+  const stops = rawNodes.filter(node => !node.is_college);
+  if (campus) network.moveNode(campus.id, 0, 0);
+
+  const radius = Math.max(420, stops.length * 28);
+  stops.forEach((node, index) => {
+    const angle = (2 * Math.PI * index / Math.max(stops.length, 1)) - Math.PI / 2;
+    network.moveNode(node.id, Math.cos(angle) * radius, Math.sin(angle) * radius);
+  });
+}
+
+function rearrangeGraph() {
+  if (!network) return;
+  clearGraphHighlight();
+  geoLayoutEnabled = false;
+  const geoButton = document.getElementById('btn-geo-layout');
+  if (geoButton) {
+    geoButton.setAttribute('aria-pressed', 'false');
+    geoButton.textContent = '🌐 Geo layout';
+  }
+  arrangeGraphPositions();
+  physicsEnabled = true;
+  updatePhysicsButton();
+  network.setOptions({
+    physics: {
+      enabled: true,
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: {
+        gravitationalConstant: -130,
+        centralGravity: 0.008,
+        springLength: 230,
+        springConstant: 0.035,
+        damping: 0.62,
+        avoidOverlap: 0.9
+      },
+      stabilization: { enabled: true, iterations: 350, fit: true }
+    }
+  });
+  network.once('stabilizationIterationsDone', () => {
+    network.setOptions({ physics: { enabled: false } });
+    physicsEnabled = false;
+    updatePhysicsButton();
+    network.fit({ animation: { duration: 450 } });
+  });
+  network.stabilize(350);
 }
 
 /* ==========================================================================
@@ -385,4 +673,3 @@ function highlightPathOnGeoMap(pathStopIds = [], segments = [], isMst = false) {
 }
 
 document.addEventListener('DOMContentLoaded', initNetworkGraph);
-

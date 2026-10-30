@@ -6,36 +6,24 @@
   <title>Student & Staff Sign In - College Bus Route Optimizer</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashboard.css">
-  <style>
-    .auth-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-    .auth-card {
-      max-width: 460px;
-      width: 100%;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/login.css">
 </head>
 <body data-portal="USER">
   <a href="#login-form" class="skip-to-content">Skip to login form</a>
 
   <div class="auth-container">
-    <div class="card auth-card">
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <div style="display: inline-flex; width: 56px; height: 56px; background: linear-gradient(135deg, #4A3E4E, #68576F); border: 1px solid rgba(230, 224, 240, 0.35); border-radius: 14px; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 16px rgba(104, 87, 111, 0.45); margin-bottom: 0.75rem;" aria-hidden="true">
+    <div class="card auth-card" data-portal="USER">
+      <div class="login-heading">
+        <div class="portal-icon" aria-hidden="true">
           🎓
         </div>
         <div class="portal-badge portal-badge-student">
           Student Portal • No 2FA Required
         </div>
-        <h2 style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; color: #E5E4E2;">
+        <h2 class="portal-heading">
           Student Transit Sign In
         </h2>
-        <p style="font-size: 0.85rem; color: #E6E0F0; margin-top: 0.2rem;">
+        <p class="portal-subtitle">
           Access bus routes, nearest stops & live travel times (No 2FA needed)
         </p>
       </div>
@@ -64,13 +52,13 @@
           <input type="password" id="login-password" class="form-control" placeholder="••••••••••••" required autocomplete="current-password" aria-required="true">
         </div>
 
-        <button type="submit" id="btn-login" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem; background: linear-gradient(135deg, #5A4760, #796082); border-color: rgba(230, 224, 240, 0.3);" aria-label="Sign In as Student">
+        <button type="submit" id="btn-login" class="btn btn-primary btn-lg login-submit" aria-label="Sign In as Student">
           <span>🎓 Sign In as Student (No 2FA)</span>
         </button>
       </form>
 
-      <div style="text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
-        Don't have an account? <a href="/register.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Register Student Account</a>
+      <div class="portal-footer">
+        Don't have an account? <a href="/register.html">Register Student Account</a>
       </div>
 
       <div style="margin-top: 0.85rem; text-align: center; font-size: 0.75rem; color: var(--text-dim); display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
@@ -85,7 +73,6 @@
     </div>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
   <script src="/js/auth.js"></script>
 </body>

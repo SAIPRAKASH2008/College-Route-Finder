@@ -1,10 +1,11 @@
 /**
  * Automated Verification Script
- * Validates Graph Algorithms (Dijkstra, Prim MST, Nearest Neighbour) & Security Logic
+ * Validates Graph Algorithms (Kruskal, Dijkstra helper, Prim MST, Nearest Neighbour) & Security Logic
  */
 
 const Graph = require('./algorithms/graph');
 const dijkstra = require('./algorithms/dijkstra');
+const kruskalRoute = require('./algorithms/kruskal');
 const primMST = require('./algorithms/primMST');
 const nearestNeighbourRoute = require('./algorithms/nearestNeighbour');
 
@@ -28,10 +29,10 @@ testGraph.addEdge(4, 5, 8); // C-D 8
 testGraph.addEdge(5, 1, 3); // D-College 3
 testGraph.addEdge(3, 1, 9); // B-College 9
 
-// TEST 1: Dijkstra Shortest Path from Stop A (2) to College (1)
+// TEST 1: Dijkstra helper regression from Stop A (2) to College (1)
 // Expected: A -> C -> B -> D -> College
 // Distance: 2 + 1 + 5 + 3 = 11 km
-console.log('--- TEST 1: Dijkstra Shortest Path (A to College) ---');
+console.log('--- TEST 1: Dijkstra Helper Regression (A to College) ---');
 const dijkstraRes = dijkstra(testGraph, 2, 1);
 console.log('Computed Path:', dijkstraRes.path.join(' -> '));
 console.log('Computed Stop Names:', dijkstraRes.stopNames.join(' -> '));
@@ -43,13 +44,13 @@ const passedDijkstra =
   dijkstraRes.totalDistance === 11;
 
 if (passedDijkstra) {
-  console.log('✅ TEST 1 PASSED: Dijkstra matches Section 12 expected path and distance (11 km)!\n');
+  console.log('✅ TEST 1 PASSED: Dijkstra helper matches the expected path and distance (11 km)!\n');
 } else {
   console.error('❌ TEST 1 FAILED! Expected:', expectedPath, '11 km. Got:', dijkstraRes.path, dijkstraRes.totalDistance);
 }
 
-// TEST 2: Disconnected Node Detection
-console.log('--- TEST 2: Disconnected Graph Node Detection ---');
+// TEST 2: Disconnected Node Detection in the Dijkstra helper
+console.log('--- TEST 2: Dijkstra Helper Disconnected Node Detection ---');
 testGraph.addNode({ id: 99, name: 'Isolated Island Stop', is_college: false });
 const disconnectedRes = dijkstra(testGraph, 2, 99);
 if (disconnectedRes.unreachable.includes(99) && disconnectedRes.totalDistance === Infinity) {
@@ -83,15 +84,40 @@ if (nnRes.path.length > 0 && nnRes.tourStops.includes(2) && nnRes.tourStops.incl
   console.error('❌ TEST 4 FAILED in Nearest Neighbour tour.');
 }
 
-// TEST 5: Encryption & Decryption of TOTP Secret
-console.log('--- TEST 5: AES-256-CBC TOTP Secret Encryption ---');
+// TEST 5: Kruskal MST-based point-to-point route
+console.log('--- TEST 5: Kruskal MST-Based Route ---');
+const kruskalGraph = new Graph();
+kruskalGraph.addNode({ id: 1, name: 'A' });
+kruskalGraph.addNode({ id: 2, name: 'B' });
+kruskalGraph.addNode({ id: 3, name: 'C' });
+kruskalGraph.addNode({ id: 4, name: 'D' });
+kruskalGraph.addEdge(1, 2, 2);
+kruskalGraph.addEdge(1, 3, 3);
+kruskalGraph.addEdge(2, 3, 2.5);
+kruskalGraph.addEdge(2, 4, 3);
+kruskalGraph.addEdge(3, 4, 1);
+const kruskalRes = kruskalRoute(kruskalGraph, 1, 4);
+const expectedKruskalPath = [1, 2, 3, 4];
+if (
+  JSON.stringify(kruskalRes.path) === JSON.stringify(expectedKruskalPath) &&
+  kruskalRes.totalDistance === 5.5 &&
+  kruskalRes.mstEdges.length === 3 &&
+  kruskalRes.networkTotalDistance === 5.5
+) {
+  console.log('✅ TEST 5 PASSED: Kruskal returns the path in the minimum spanning tree!\n');
+} else {
+  console.error('❌ TEST 5 FAILED in Kruskal route calculation.', kruskalRes);
+}
+
+// TEST 6: Encryption & Decryption of TOTP Secret
+console.log('--- TEST 6: AES-256-CBC TOTP Secret Encryption ---');
 const { encryptSecret, decryptSecret } = require('./config/db');
 const sampleSecret = 'JBSWY3DPEHPK3PXP';
 const encrypted = encryptSecret(sampleSecret);
 const decrypted = decryptSecret(encrypted);
 
 if (encrypted !== sampleSecret && decrypted === sampleSecret) {
-  console.log('✅ TEST 5 PASSED: TOTP secret securely encrypted and decrypted!\n');
+  console.log('✅ TEST 6 PASSED: TOTP secret securely encrypted and decrypted!\n');
 } else {
   console.error('❌ TEST 5 FAILED: Encryption roundtrip mismatch.');
 }

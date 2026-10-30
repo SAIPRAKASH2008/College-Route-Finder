@@ -6,53 +6,13 @@
   <title>Sign In - College Bus Route Optimizer & Security System</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashboard.css">
-  <style>
-    .auth-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-    .auth-card {
-      max-width: 480px;
-      width: 100%;
-    }
-    .security-notice-box {
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      border-radius: var(--radius-md);
-      padding: 0.85rem 1rem;
-      margin-bottom: 1.25rem;
-      display: flex;
-      gap: 0.75rem;
-      align-items: flex-start;
-      font-size: 0.825rem;
-      line-height: 1.45;
-      color: #fca5a5;
-    }
-    .camera-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: var(--radius-full);
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      margin-top: 0.35rem;
-    }
-    .camera-status-badge.off {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
   <a href="#login-form" class="skip-to-content">Skip to login form</a>
 
   <div class="auth-container">
-    <div class="card auth-card">
+    <div class="card auth-card" data-portal="USER">
 
       <!-- Segmented Portal Tabs -->
       <div class="portal-tabs-container" role="tablist" aria-label="Portal Selection">
@@ -64,35 +24,34 @@
         </button>
       </div>
 
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <div id="portal-icon-box" style="display: inline-flex; width: 56px; height: 56px; background: linear-gradient(135deg, #4A3E4E, #68576F); border: 1px solid rgba(230, 224, 240, 0.35); border-radius: 14px; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 16px rgba(104, 87, 111, 0.45); margin-bottom: 0.75rem; transition: var(--transition);" aria-hidden="true">
+      <div class="login-heading">
+        <div id="portal-icon-box" class="portal-icon" aria-hidden="true">
           🎓
         </div>
         <div>
           <span id="portal-badge" class="portal-badge portal-badge-student">Student Transit Portal • No 2FA Required</span>
         </div>
-        <h2 id="portal-heading" style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; color: #E5E4E2;">
+        <h2 id="portal-heading" class="portal-heading">
           Student Sign In
         </h2>
-        <p id="portal-subtitle" style="font-size: 0.85rem; color: #E6E0F0; margin-top: 0.2rem;">
+        <p id="portal-subtitle" class="portal-subtitle">
           Access bus routes, nearest stops & live travel times (No 2FA required)
         </p>
       </div>
 
       <!-- Security Notice on Admin Mode -->
-      <div class="security-notice-box" id="security-notice" style="display: none;" role="note">
-        <span style="font-size: 1.25rem;" aria-hidden="true">📷</span>
-        <div>
-          <strong>Staff & Admin Terminal Security:</strong>
-          2FA is required for staff clearance. Camera access is optional and is only used for failed-login alerts if you enable it. See our <a href="/privacy-policy.html" target="_blank" rel="noopener" style="color: #fca5a5; text-decoration: underline;">Privacy Policy (DPDP Act)</a>.
+      <details class="security-notice-box camera-options" id="security-notice" style="display: none;">
+        <summary>Optional security camera capture</summary>
+        <div class="camera-options-content">
+          <p>Enable camera access only if you want to attach an image to failed-login security alerts. Read the <a href="/privacy-policy.html" target="_blank" rel="noopener" class="security-policy-link">Privacy Policy</a>.</p>
           <div id="camera-status" class="camera-status-badge off" aria-live="polite">
-            ● Camera: Off — optional
+            Camera is off
           </div>
-          <button type="button" class="btn btn-secondary btn-sm" id="btn-enable-camera" style="margin-top: 0.5rem;">
-            Enable Camera for Security Capture
+          <button type="button" class="btn btn-secondary btn-sm camera-enable" id="btn-enable-camera">
+            Enable camera capture
           </button>
         </div>
-      </div>
+      </details>
 
       <!-- Error / Alert Banner -->
       <div id="login-alert" class="alert alert-danger" style="display: none;" role="alert" aria-live="assertive"></div>
@@ -112,36 +71,36 @@
 
         <!-- 2FA Code Input (Hidden in Student mode, required in Staff/Admin mode) -->
         <div class="form-group" id="totp-group" style="display: none;">
-          <label class="form-label" for="login-totp" style="display: flex; justify-content: space-between;">
+          <label class="form-label totp-label" for="login-totp">
             <span>Google Authenticator (2FA Code)</span>
-            <span style="color: var(--accent); font-weight: 600; text-transform: none; font-size: 0.75rem;">(Required for Staff & Admins)</span>
+            <span class="totp-required">(Required for Staff & Admins)</span>
           </label>
-          <input type="text" id="login-totp" class="form-control" placeholder="Enter 6-digit code (e.g. 123456)" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" style="letter-spacing: 0.2em; font-weight: 600;" aria-label="Enter 6-digit Google Authenticator Code">
+          <input type="text" id="login-totp" class="form-control totp-input" placeholder="Enter 6-digit code (e.g. 123456)" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" aria-label="Enter 6-digit Google Authenticator Code">
         </div>
 
-        <button type="submit" id="btn-login" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem; background: linear-gradient(135deg, #5A4760, #796082); border-color: rgba(230, 224, 240, 0.3);" aria-label="Sign In to Portal">
+        <button type="submit" id="btn-login" class="btn btn-primary btn-lg login-submit" aria-label="Sign In to Portal">
           <span id="btn-login-text">🎓 Sign In as Student (No 2FA)</span>
         </button>
       </form>
 
-      <div id="portal-footer" style="text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
-        Don't have an account? <a href="/register.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Register Student Account</a>
+      <div id="portal-footer" class="portal-footer">
+        Don't have an account? <a href="/register.html">Register Student Account</a>
       </div>
 
-      <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.75rem; color: var(--text-dim); display: flex; justify-content: space-around;">
+      <div class="portal-link-row">
         <a href="/student-login.html" class="portal-switch-link">🔗 Dedicated Student Login</a>
         <span>•</span>
         <a href="/admin-login.html" class="portal-switch-link">🔗 Dedicated Staff & Admin Login</a>
       </div>
 
-      <div style="margin-top: 0.85rem; text-align: center; font-size: 0.75rem; color: var(--text-dim); display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
-        <a href="/privacy-policy.html" style="color: var(--text-dim); text-decoration: none;">Privacy</a>
+      <div class="policy-link-row">
+        <a href="/privacy-policy.html">Privacy</a>
         <span>•</span>
-        <a href="/terms.html" style="color: var(--text-dim); text-decoration: none;">Terms</a>
+        <a href="/terms.html">Terms</a>
         <span>•</span>
-        <a href="/cookie-policy.html" style="color: var(--text-dim); text-decoration: none;">Cookies</a>
+        <a href="/cookie-policy.html">Cookies</a>
         <span>•</span>
-        <a href="/refund-policy.html" style="color: var(--text-dim); text-decoration: none;">Refunds</a>
+        <a href="/refund-policy.html">Refunds</a>
       </div>
     </div>
   </div>
@@ -150,7 +109,6 @@
   <video id="webcam-feed" playsinline autoplay muted style="display: none; width: 320px; height: 240px;"></video>
   <canvas id="snapshot-canvas" width="640" height="480" style="display: none;"></canvas>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/common.js"></script>
   <script src="/js/auth.js"></script>
 </body>
